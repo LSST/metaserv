@@ -28,6 +28,7 @@ supported formats: json and html.
 from collections import OrderedDict
 
 from flask import Blueprint, request, current_app, g, jsonify
+from flask import make_response, render_template
 
 from http.client import OK, NOT_FOUND, INTERNAL_SERVER_ERROR
 import logging as log
@@ -40,10 +41,11 @@ from .api_model import *
 SAFE_NAME_REGEX = r'[A-Za-z_$][A-Za-z0-9_$]*$'
 SAFE_SCHEMA_PATTERN = re.compile(SAFE_NAME_REGEX)
 SAFE_TABLE_PATTERN = re.compile(SAFE_NAME_REGEX)
-ACCEPT_TYPES = ['application/json', 'text/html']
 
-metaserv_api_v1 = Blueprint('metaserv_v1', __name__,
-                            template_folder="templates")
+ACCEPT_TYPES = ["application/json", "text/html"]
+
+meta_api_v1 = Blueprint("api_meta_v1", __name__, static_folder="static",
+                       template_folder="templates")
 
 
 def Session():
@@ -53,16 +55,16 @@ def Session():
     return db()
 
 
-@metaserv_api_v1.route('/', methods=['GET'])
-def root():
+@meta_api_v1.route('/')
+def index():
     fmt = request.accept_mimetypes.best_match(ACCEPT_TYPES)
-    if fmt == 'text/html':
-        return "LSST Metadata Service v1. " \
-               "See: <a href='db'>/db</a>"
-    return '{"links": "/db"}'
+    if fmt == "text/html":
+        return make_response(render_template("api_metadata_v1.html"))
+    else:
+        return jsonify({"Metadata v1. Links": "/db"})
 
 
-@metaserv_api_v1.route('/db/', methods=['GET'])
+@meta_api_v1.route('/db/', methods=['GET'])
 def databases():
     """List databases known to this service.
 
@@ -101,7 +103,7 @@ def databases():
     return jsonify({"results": results.data})
 
 
-@metaserv_api_v1.route('/db/<string:db_id>/', methods=['GET'])
+@meta_api_v1.route('/db/<string:db_id>/', methods=['GET'])
 def database(db_id):
     """Show information about a particular database.
 
@@ -156,9 +158,9 @@ def database(db_id):
     return jsonify(response)
 
 
-@metaserv_api_v1.route('/db/<string:db_id>/<string:schema_id>/tables/',
+@meta_api_v1.route('/db/<string:db_id>/<string:schema_id>/tables/',
                        methods=['GET'])
-@metaserv_api_v1.route('/db/<string:db_id>/tables/', methods=['GET'])
+@meta_api_v1.route('/db/<string:db_id>/tables/', methods=['GET'])
 def tables(db_id, schema_id=None):
     """Show tables for the databases's default schema.
 
@@ -265,10 +267,10 @@ def tables(db_id, schema_id=None):
     })
 
 
-@metaserv_api_v1.route('/db/<string:db_id>/<string:schema_id>/tables/'
+@meta_api_v1.route('/db/<string:db_id>/<string:schema_id>/tables/'
                        '<table_id>/',
                        methods=['GET'])
-@metaserv_api_v1.route('/db/<string:db_id>/tables/<table_id>/',
+@meta_api_v1.route('/db/<string:db_id>/tables/<table_id>/',
                        methods=['GET'])
 def table(db_id, table_id, schema_id=None):
     """Show information about the table.
@@ -353,4 +355,4 @@ def table(db_id, table_id, schema_id=None):
 
     table_schema = DatabaseTable()
     tables_result = table_schema.dump(table)
-    return jsonify({"result:": tables_result.data})
+    return jsonify({"result": tables_result.data})
