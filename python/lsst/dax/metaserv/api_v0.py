@@ -41,10 +41,10 @@ SAFE_NAME_REGEX = r'[a-zA-Z0-9_]+$'
 SAFE_SCHEMA_PATTERN = re.compile(SAFE_NAME_REGEX)
 SAFE_TABLE_PATTERN = re.compile(SAFE_NAME_REGEX)
 
-metaREST = Blueprint('metaREST', __name__, template_folder="templates")
+metaRESTv0 = Blueprint('api_v0', __name__, template_folder="templates")
 
 
-@metaREST.route('/', methods=['GET'])
+@metaRESTv0('/', methods=['GET'])
 def getRoot():
     fmt = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     if fmt == 'text/html':
@@ -52,21 +52,21 @@ def getRoot():
     return "LSST Metadata Service v0. See: /db and /image."
 
 
-@metaREST.route('/db', methods=['GET'])
+@metaRESTv0('/db', methods=['GET'])
 def getDb():
     '''Lists types of databases (that have at least one database).'''
     query = "SELECT DISTINCT lsstLevel FROM Repo WHERE repoType = 'db'"
     return _resultsOf(text(query), scalar=True)
 
 
-@metaREST.route('/db/<string:lsstLevel>', methods=['GET'])
+@metaRESTv0('/db/<string:lsstLevel>', methods=['GET'])
 def getDbPerType(lsstLevel):
     '''Lists databases for a given type.'''
     query = "SELECT dbName FROM Repo JOIN DbRepo on (repoId=dbRepoId) WHERE lsstLevel = :lsstLevel"
     return _resultsOf(text(query), paramMap={"lsstLevel": lsstLevel})
 
 
-@metaREST.route('/db/<string:lsstLevel>/<string:dbName>', methods=['GET'])
+@metaRESTv0('/db/<string:lsstLevel>/<string:dbName>', methods=['GET'])
 def getDbPerTypeDbName(lsstLevel, dbName):
     '''Retrieves information about one database.'''
     # We don't use lsstLevel here because db names are unique across all types.
@@ -75,7 +75,7 @@ def getDbPerTypeDbName(lsstLevel, dbName):
     return _resultsOf(text(query), paramMap={"dbName": dbName}, scalar=True)
 
 
-@metaREST.route('/db/<string:lsstLevel>/<string:dbName>/tables', methods=['GET'])
+@metaRESTv0('/db/<string:lsstLevel>/<string:dbName>/tables', methods=['GET'])
 def getDbPerTypeDbNameTables(lsstLevel, dbName):
     '''Lists table names in a given database.'''
     query = "SELECT tableName FROM DbRepo dbrepo " \
@@ -84,7 +84,7 @@ def getDbPerTypeDbNameTables(lsstLevel, dbName):
     return _resultsOf(text(query), paramMap={"dbName": dbName})
 
 
-@metaREST.route('/db/<string:lsstLevel>/<string:dbName>/tables/'
+@metaRESTv0('/db/<string:lsstLevel>/<string:dbName>/tables/'
                 '<string:tableName>', methods=['GET'])
 def getDbPerTypeDbNameTablesTableName(lsstLevel, dbName, tableName):
     '''Retrieves information about a table from a given database.'''
@@ -94,7 +94,7 @@ def getDbPerTypeDbNameTablesTableName(lsstLevel, dbName, tableName):
     return _resultsOf(text(query), paramMap={"dbName": dbName, "tableName": tableName}, scalar=True)
 
 
-@metaREST.route('/db/<string:lsstLevel>/<string:dbName>/' +
+@metaRESTv0('/db/<string:lsstLevel>/<string:dbName>/' +
                 'tables/<string:tableName>/schema', methods=['GET'])
 def getDbPerTypeDbNameTablesTableNameSchema(lsstLevel, dbName, tableName):
     '''Retrieves schema for a given table.'''
@@ -105,7 +105,7 @@ def getDbPerTypeDbNameTablesTableNameSchema(lsstLevel, dbName, tableName):
     return _response(_error("ValueError", "Database name or Table name is not safe"), 400)
 
 
-@metaREST.route('/image', methods=['GET'])
+@metaRESTv0('/image', methods=['GET'])
 def getImage():
     return "meta/.../image not implemented. I am supposed to print list of " \
            "supported image types here, something like: raw, template, coadd, " \
