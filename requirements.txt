@@ -1,3 +1,4 @@
 flask
 marshmallow
 setuptools_scm
+pytest
