@@ -1,0 +1,3 @@
+flask
+marshmallow
+setuptools_scm
