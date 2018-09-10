@@ -1,0 +1,5 @@
+flask
+marshmallow
+setuptools_scm
+pytest
+pytest-runner
