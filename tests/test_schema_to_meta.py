@@ -42,6 +42,7 @@ class TestS2M(unittest.TestCase):
         """
         Basic test: load data for two tables.
         """
+        raise ValueError()
         (fd, fName) = tempfile.mkstemp()
         temp_file = os.fdopen(fd, "w")
         temp_file.write("""

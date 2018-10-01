@@ -1,8 +1,6 @@
 setupRequired(dax_webservcommon)
-setupRequired(db)
 setupRequired(flask)
 setupRequired(python)
-setupRequired(python_mysqlclient)
 setupRequired(scons)
 setupRequired(sconsUtils)
 setupRequired(sqlalchemy)
