@@ -30,11 +30,8 @@ from collections import OrderedDict
 from flask import Blueprint, request, current_app, g, jsonify
 from flask import make_response, render_template
 
-from http.client import OK, NOT_FOUND, INTERNAL_SERVER_ERROR
-import logging as log
 import re
-from sqlalchemy import text, or_, and_
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import or_, and_
 from .model import session_maker, MSDatabase, MSDatabaseSchema, MSDatabaseTable
 from .api_model import *
 
