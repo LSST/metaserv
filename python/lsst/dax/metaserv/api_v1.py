@@ -1,8 +1,10 @@
-# LSST Data Management System
-# Copyright 2017 AURA/LSST.
+# This file is part of dax_metaserv.
 #
-# This product includes software developed by the
-# LSST Project (http://www.lsst.org/).
+# Developed for the LSST Data Management System.
+# This product includes software developed by the LSST Project
+# (http://www.lsst.org).
+# See the COPYRIGHT file at the top-level directory of this distribution
+# for details of code ownership.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,9 +16,8 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
-# You should have received a copy of the LSST License Statement and
-# the GNU General Public License along with this program.  If not,
-# see <http://www.lsstcorp.org/LegalNotices/>.
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 This module implements the RESTful interface for Metadata Service.
@@ -24,14 +25,21 @@ Corresponding URI: /meta. Default output format is json. Currently
 supported formats: json and html.
 
 @author Brian Van Klaveren, SLAC
+@author Kenny Lo, SLAC
 """
+import os
 from collections import OrderedDict
+import base64
+import json
 
 from flask import Blueprint, request, current_app, g, jsonify
 from flask import make_response, render_template
 
 import re
 from sqlalchemy import or_, and_
+
+import lsst.log as log
+
 from .model import session_maker, MSDatabase, MSDatabaseSchema, MSDatabaseTable
 from .api_model import *
 
@@ -44,12 +52,39 @@ ACCEPT_TYPES = ["application/json", "text/html"]
 meta_api_v1 = Blueprint("api_meta_v1", __name__, static_folder="static",
                        template_folder="templates")
 
+# configure the log file (log4cxx)
+config_path = meta_api_v1.root_path+"/config/"
+log.configure(os.path.join(config_path, "log.properties"))
+
 
 def Session():
     db = getattr(g, '_Session', None)
     if db is None:
         db = g._session = session_maker(current_app.config["default_engine"])
     return db()
+
+
+# log the user name of the auth token
+@meta_api_v1.before_request
+def check_auth():
+    """ Data Formats
+    HTTP Header
+        Authorization: Bearer <JWT token>
+    JWT token
+        header.payload.signature[optional])
+    """
+    auth_header = request.headers.get("Authorization")
+    if auth_header:
+        try:
+            auth_header_parts = auth_header.split(" ")
+            atk = auth_header_parts[1]
+            p = atk.split(".")[1]
+            p = p + ('=' * (len(p) % 4)) # padding for b64
+            p = base64.urlsafe_b64decode(p)
+            user_name = json.loads(p).get("uid")
+            log.info("JWT received for user: {}".format(user_name))
+        except(UnicodeDecodeError, TypeError, ValueError):
+            log.info("unexpected error in JWT")
 
 
 @meta_api_v1.route('/')
