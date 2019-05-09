@@ -42,7 +42,7 @@ metaserv_parser = RawConfigParser()
 metaserv_parser.optionxform = str
 
 # Configure DB Engine
-defaults_file = "~/.lsst/webserv.ini"
+defaults_file = os.environ.get("WEBSERV_CONFIG", "~/.lsst/webserv.ini")
 
 with open(os.path.expanduser(defaults_file)) as cfg:
     metaserv_parser.read_file(cfg, defaults_file)
