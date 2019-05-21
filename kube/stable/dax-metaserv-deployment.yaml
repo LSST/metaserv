@@ -19,7 +19,7 @@ spec:
         image: webserv/metaserv:dax_latest
         imagePullPolicy: Always
         env:
-        - name: IMGSERV_CONFIG
+        - name: WEBSERV_CONFIG
           value: "/etc/dax-webserv/webserv.ini"
         ports:
         - containerPort: 5000 
@@ -27,13 +27,7 @@ spec:
         - name: config
           mountPath: "/etc/dax-webserv"
           readOnly: true
-        - name: datasets
-          mountPath: "/datasets"
-          readOnly: true
       volumes:
       - name: config
         secret:
           secretName: dax-metaserv-config
-      - name: datasets
-        persistentVolumeClaim:
-          claimName: dax-metaserv-datasets-claim
