@@ -1,5 +1,5 @@
 #!/bin/bash -x
-DAX_NAMESPACE=${DAX_NAMESPACE:-'dax-stable'}
+DAX_NAMESPACE=${DAX_NAMESPACE:-'lsst-lsp-stable-dax'}
 
 kubectl delete ingress dax-metaserv-ingress --namespace $DAX_NAMESPACE
 kubectl delete service dax-metaserv-service --namespace $DAX_NAMESPACE
