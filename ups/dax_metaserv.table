@@ -1,9 +1,7 @@
 setupRequired(dax_webservcommon)
 setupRequired(flask)
 setupRequired(python)
-setupRequired(scons)
 setupRequired(sconsUtils)
-setupRequired(sqlalchemy)
 setupRequired(marshmallow)
 
 envPrepend(LD_LIBRARY_PATH, ${PRODUCT_DIR}/lib)
